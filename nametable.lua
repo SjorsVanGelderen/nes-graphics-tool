@@ -19,15 +19,15 @@ function Nametable.new()
    local mtw, mth = metatiler.image:getDimensions()
    local mt_pixel_size = unit
    
-   -- 32 * 30 = 960 tiles
-   for i = 1, 960 do
+   -- 16 * 15 = 240 16x16 metatiles, 960 8x8 tiles
+   for i = 1, 240 do
       table.insert(self.metatiles, 1)
       table.insert(self.quads, graphics.newQuad(0, 0, 16, 16, mtw, mth))
    end
 
    function self.refresh()
-      for y = 1, 30 do
-	 for x = 1, 32 do
+      for y = 1, 15 do
+	 for x = 1, 16 do
 	    local index = (y - 1) * 16 + x
       
 	    self.quads[index]:setViewport(
@@ -109,13 +109,15 @@ function Nametable.new()
       for i = 0, 16 do
 	 graphics.line(
 	    translation.x + i * 16 * zoom, translation.y,
-	    translation.x + i * 16 * zoom, translation.y + 16 * 16 * zoom
+	    translation.x + i * 16 * zoom, translation.y + 15 * 16 * zoom
 	 )
-	 
-	 graphics.line(
-	    translation.x, translation.y + i * 16 * zoom,
-	    translation.x + 16 * 16 * zoom, translation.y + i * 16 * zoom
-	 )
+
+         if i < 16 then
+            graphics.line(
+               translation.x, translation.y + i * 16 * zoom,
+               translation.x + 16 * 16 * zoom, translation.y + i * 16 * zoom
+            )
+         end
       end
 
       graphics.setColor(1, 1, 1, 1)

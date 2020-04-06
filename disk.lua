@@ -125,11 +125,26 @@ function loadMetatiles(path)
       end
       
       local byte = string.byte(char)
-      bytes_in_file[#bytes_in_file + 1] = byte
+      bytes_in_file[#bytes_in_file + 1] = byte + 1
    end
    
    file:close()
-   metatiler.tiles = bytes_in_file
+   local tiles = {}
+   
+   for i = 1, 256 do --, 4 do      
+      local x = (i - 1) % 16 * 2
+      local y = math.floor((i - 1) / 16) * 2
+
+      local o = (i - 1) * 4
+
+      -- Metatile segments
+      tiles[y * 32 + x + 1] = bytes_in_file[o + 1] -- Top left
+      tiles[y * 32 + x + 1 + 1] = bytes_in_file[o + 2] -- Top right
+      tiles[y * 32 + x + 32 + 1] = bytes_in_file[o + 3] -- Bottom left
+      tiles[y * 32 + x + 32 + 1 + 1] = bytes_in_file[o + 4] -- Bottom right
+   end
+   
+   metatiler.tiles = tiles
 
    print("Loaded the metatiles!")
 end
@@ -177,7 +192,7 @@ function loadNametable(path)
       end
       
       local byte = string.byte(char)
-      bytes_in_file[#bytes_in_file + 1] = byte
+      bytes_in_file[#bytes_in_file + 1] = byte + 1
    end
    
    file:close()
@@ -271,7 +286,7 @@ function saveSamples(path)
    print("Saved the samples!")
 end
 
-function saveMetatiles(path)
+function saveMetatiles(path)   
    local file = io.open(path .. ".mt", "r")
    if file ~= nil then
       file:close()
@@ -288,10 +303,22 @@ function saveMetatiles(path)
    end
 
    local file = io.open(path .. ".mt", "wb+")
+   local indices = {}
    
-   for i = 1, #metatiler.tiles do
-      local byte = metatiler.tiles[i]
-      file:write(string.char(byte))
+   for i = 1, 256 do
+      local x = (i - 1) % 16 * 2
+      local y = math.floor((i - 1) / 16) * 2
+      
+      -- Metatile segments
+      table.insert(indices, y * 32 + x) -- Top left
+      table.insert(indices, y * 32 + x + 1) -- Top right
+      table.insert(indices, y * 32 + x + 32) -- Bottom left
+      table.insert(indices, y * 32 + x + 32 + 1) -- Bottom right
+   end
+
+   for o = 1, #indices do
+      local index = indices[o] + 1
+      file:write(string.char(metatiler.tiles[index] - 1))
    end
    
    file:close()
@@ -346,7 +373,7 @@ function saveNametable(path)
    local file = io.open(path .. ".nt", "wb+")
 
    for i = 1, #nametable.metatiles do      
-      local byte = nametable.metatiles[i]      
+      local byte = nametable.metatiles[i] - 1
       file:write(string.char(byte))
    end
    
