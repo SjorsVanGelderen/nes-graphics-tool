@@ -13,6 +13,7 @@ Metatiler = {}
 -- TODO:
 -- Allow creation of metasprites
 -- Investigate whether background tiles support mirroring or not
+-- Only allow one sample per 4 metatiles
 
 function Metatiler.new()
    local self = {}
@@ -33,12 +34,16 @@ function Metatiler.new()
    
    for i = 1, 1024 do
       table.insert(self.tiles, 1)
-      table.insert(self.samples, 1)
+      
+      if i <= 256 then
+         table.insert(self.samples, 5)
+      end
    end
 
    local function updateTileInImage(x, y)
-      local index = (y - 1) * 32 + x
-      local tile = self.tiles[index]
+      local tileIndex = (y - 1) * 32 + x
+      local sampleIndex = math.floor((y - 1) / 2) * 16 + math.floor((x - 1) / 2) + 1
+      local tile = self.tiles[tileIndex]
       local ox = (tile - 1) % 16 * 8
       local oy = math.floor((tile - 1) / 16) * 8
       
@@ -54,7 +59,7 @@ function Metatiler.new()
 	    if tone == 0 then
 	       c = full_palette[sampler.background_color]
 	    else
-	       c = full_palette[sampler.samples[self.samples[index]][tone]]
+               c = full_palette[sampler.samples[self.samples[sampleIndex]][tone]]
 	    end
 
 	    r, g, b = c[1] / 255, c[2] / 255, c[3] / 255
@@ -102,10 +107,22 @@ function Metatiler.new()
 	 )
 	 
 	 if point ~= nil then
-	    point = point.div((mt_tile_size / 2) * zoom).floor()
-	    local tileIndex = point.y * 32 + point.x + 1
+	    local tilePoint = point.div((mt_tile_size / 2) * zoom).floor()
+	    local tileIndex = tilePoint.y * 32 + tilePoint.x + 1
 	    self.tiles[tileIndex] = self.tile
-	    self.samples[tileIndex] = sampler.active_sample
+
+            local p = point.div(mt_tile_size * zoom).floor()
+            point = p.mul(2).add(Vec2.new(1, 1))
+
+            local s = p.y * 16 + p.x + 1
+	    self.samples[s] = sampler.active_sample
+
+            -- This is pretty lazy, the function needs to only be called once
+            -- and should apply to the metatile instead of a single tile
+            -- It's like this because I thought the attributes worked differently at first
+	    updateTileInImage(point.x, point.y)
+	    updateTileInImage(point.x + 1, point.y)
+	    updateTileInImage(point.x, point.y + 1)
 	    updateTileInImage(point.x + 1, point.y + 1)
 	    
 	    return true

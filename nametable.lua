@@ -19,7 +19,7 @@ function Nametable.new()
    local mtw, mth = metatiler.image:getDimensions()
    local mt_pixel_size = unit
    
-   -- 16 * 15 = 240 16x16 metatiles, 960 8x8 tiles
+   -- 16 * 15 = 240 (16x16) metatiles, 960 (8x8) tiles
    for i = 1, 240 do
       table.insert(self.metatiles, 1)
       table.insert(self.quads, graphics.newQuad(0, 0, 16, 16, mtw, mth))

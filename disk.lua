@@ -131,7 +131,7 @@ function loadMetatiles(path)
    file:close()
    local tiles = {}
    
-   for i = 1, 256 do --, 4 do      
+   for i = 1, 256 do
       local x = (i - 1) % 16 * 2
       local y = math.floor((i - 1) / 16) * 2
 
@@ -382,6 +382,72 @@ function saveNametable(path)
    print("Saved the nametable!")
 end
 
+function saveAttributeTable(path)
+   local file = io.open(path .. ".at", "r")
+   if file ~= nil then
+      file:close()
+      
+      print(path .. ".at exists already. Overwrite? y/n")
+      response = io.read()
+
+      if response == nil or response == "n" or response == "no" or
+	 (response ~= "y" and response ~= "yes")
+      then
+	 print("Canceled!")
+	 return
+      end
+   end
+   
+   local file = io.open(path .. ".at", "wb+")
+   local samples = {}
+   
+   for y = 1, 8 do
+      for x = 1, 8 do
+         local offset = (y - 1) * 16 * 2 + (x - 1) * 2 + 1
+         local metatileIndices = {
+            offset, -- Top left
+            offset + 1, -- Top right
+            offset + 16, -- Bottom left
+            offset + 17 -- Bottom right
+         }
+
+         for i = 1, #metatileIndices do
+            table.insert(samples, metatiler.samples[i])
+         end
+      end
+   end
+   
+   for i = 1, #samples, 4 do
+      
+      local sample = samples[i] - 5
+      local byte = 0x00
+
+      if sample < 0 then
+         sample = 5
+         print("Warning: incorrect sample used in attribute table!")
+      end
+      
+      for o = 0, 3 do
+         local offset = o * 2
+         
+         if sample == 1 then
+            byte = bit.bor(byte, bit.rshift(0x80, 1 + offset))
+         elseif sample == 2 then
+            byte = bit.bor(byte, bit.rshift(0x80, 0 + offset))
+         elseif sample == 3 then
+            byte = bit.bor(byte, bit.rshift(0x80, 1 + offset))
+            byte = bit.bor(byte, bit.rshift(0x80, 0 + offset))
+         end
+      end
+
+      file:write(string.char(byte))
+   end
+   
+   file:close()
+
+   print("Saved the nametable!")
+end
+
 function loadProject()
    print("Please enter the name of the project to load:")
    local path = io.read()
@@ -416,4 +482,5 @@ function saveProject()
    saveMetatiles(path)
    saveMetatilesSamples(path)
    saveNametable(path)
+   saveAttributeTable(path)
 end
