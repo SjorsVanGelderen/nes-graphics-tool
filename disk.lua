@@ -201,6 +201,31 @@ function loadNametable(path)
    print("Loaded the nametable!")
 end
 
+function loadAttributeTable(path)
+   
+end
+
+function loadProject()
+   print("Please enter the name of the project to load:")
+   local path = io.read()
+
+   if path == nil then
+      print("Canceled!")
+      return
+   end
+
+   loadSamples(path)
+   loadPattern(path)
+   loadMetatiles(path)
+   loadMetatilesSamples(path)
+   loadNametable(path)
+   loadAttributeTable(path)
+   sampler.updateSamples()
+   pattern.updateColors()
+   metatiler.generateImage()
+   nametable.refresh()
+end
+
 function savePattern(path)
    local image_data = pattern.tone_image_data
 
@@ -418,13 +443,12 @@ function saveAttributeTable(path)
    end
    
    for i = 1, #samples, 4 do
-      
-      local sample = samples[i] - 5
+      local sample = samples[i] - 1
       local byte = 0x00
 
-      if sample < 0 then
-         sample = 5
-         print("Warning: incorrect sample used in attribute table!")
+      if sample > 3 then
+         sample = 0
+         print("Warning: sprite sample used in background attribute table!")
       end
       
       for o = 0, 3 do
@@ -446,26 +470,6 @@ function saveAttributeTable(path)
    file:close()
 
    print("Saved the nametable!")
-end
-
-function loadProject()
-   print("Please enter the name of the project to load:")
-   local path = io.read()
-
-   if path == nil then
-      print("Canceled!")
-      return
-   end
-
-   loadSamples(path)
-   loadPattern(path)
-   loadMetatiles(path)
-   loadMetatilesSamples(path)
-   loadNametable(path)
-   sampler.updateSamples()
-   pattern.updateColors()
-   metatiler.generateImage()
-   nametable.refresh()
 end
 
 function saveProject()

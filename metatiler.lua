@@ -36,7 +36,7 @@ function Metatiler.new()
       table.insert(self.tiles, 1)
       
       if i <= 256 then
-         table.insert(self.samples, 5)
+         table.insert(self.samples, 1)
       end
    end
 
