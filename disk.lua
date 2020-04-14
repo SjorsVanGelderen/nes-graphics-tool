@@ -92,16 +92,17 @@ function loadSamples(path)
 	 break
       end
       
-      local byte = string.byte(char)
+      local byte = string.byte(char) + 1
       bytes_in_file[#bytes_in_file + 1] = byte
    end
    
    file:close()
 
    sampler.background_color = bytes_in_file[1]
+   
    for i = 1, #sampler.samples do
       for o = 1, 3 do
-	 sampler.samples[i][o] = bytes_in_file[(i - 1) * 3 + o + 1]
+	 sampler.samples[i][o] = bytes_in_file[(i - 1) * 4 + (o - 1) + 2]
       end
    end
 
@@ -202,7 +203,44 @@ function loadNametable(path)
 end
 
 function loadAttributeTable(path)
+--    local file = io.open(path .. ".at", "rb")
+--    local bytes_in_file = {}
+--    local samples = {}
+
+--    if file == nil then
+--       print("The file " .. path .. ".at does not exist!")
+--       return
+--    end
+
+--    while true do
+--       local char = file:read(1)
+
+--       if char == nil then
+-- 	 break
+--       end
+      
+--       local byte = string.byte(char)
+--       bytes_in_file[#bytes_in_file + 1] = byte + 1
+--    end
    
+--    for i = 1, #bytes_in_file do
+--       local entry = bytes_in_file[i]
+
+--       local sample_1 = bit.band(entry, 0x3)
+--       local sample_2 = bit.rshift(bit.band(entry, 0xC), 2)
+--       local sample_3 = bit.rshift(bit.band(entry, 0x30), 4)
+--       local sample_4 = bit.rshift(bit.band(entry, 0xC0), 6)
+
+--       table.insert(samples, sample_1 + 1)
+--       table.insert(samples, sample_2 + 1)
+--       table.insert(samples, sample_3 + 1)
+--       table.insert(samples, sample_4 + 1)
+--    end
+   
+--    file:close()
+--    -- metatiler.samples = samples -- This is wrong
+
+--    print("Loaded the attribute table!")
 end
 
 function loadProject()
@@ -296,12 +334,12 @@ function saveSamples(path)
    end
    
    local file = io.open(path .. ".s", "wb+")
-
-   file:write(string.char(sampler.background_color))
    
    for i = 1, #sampler.samples do
+      file:write(string.char(sampler.background_color - 1))
+      
       for o = 1, 3 do
-	 local byte = sampler.samples[i][o]
+	 local byte = sampler.samples[i][o] - 1
 	 file:write(string.char(byte))
       end
    end
@@ -429,6 +467,7 @@ function saveAttributeTable(path)
    for y = 1, 8 do
       for x = 1, 8 do
          local offset = (y - 1) * 16 * 2 + (x - 1) * 2 + 1
+         
          local metatileIndices = {
             offset, -- Top left
             offset + 1, -- Top right
@@ -437,39 +476,20 @@ function saveAttributeTable(path)
          }
 
          for i = 1, #metatileIndices do
-            table.insert(samples, metatiler.samples[i])
+            local s = metatiler.samples[nametable.metatiles[metatileIndices[i]]]
+            byte = bit.bor(byte, bit.lshift(0x01, 1 + offset))
+         elseif sample == 3 then
+            byte = bit.bor(byte, bit.lshift(0x01, 0 + offset))
+            byte = bit.bor(byte, bit.lshift(0x01, 1 + offset))
          end
-      end
-   end
-   
-   for i = 1, #samples, 4 do
-      local sample = samples[i] - 1
-      local byte = 0x00
-
-      if sample > 3 then
-         sample = 0
-         print("Warning: sprite sample used in background attribute table!")
       end
       
-      for o = 0, 3 do
-         local offset = o * 2
-         
-         if sample == 1 then
-            byte = bit.bor(byte, bit.rshift(0x80, 1 + offset))
-         elseif sample == 2 then
-            byte = bit.bor(byte, bit.rshift(0x80, 0 + offset))
-         elseif sample == 3 then
-            byte = bit.bor(byte, bit.rshift(0x80, 1 + offset))
-            byte = bit.bor(byte, bit.rshift(0x80, 0 + offset))
-         end
-      end
-
       file:write(string.char(byte))
    end
    
    file:close()
 
-   print("Saved the nametable!")
+   print("Saved the attribute table!")
 end
 
 function saveProject()

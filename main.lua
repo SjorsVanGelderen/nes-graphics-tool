@@ -167,6 +167,10 @@ end
 
 function love.resize(w, h)
    unit = screen.y / 600
+   screen = Vec2.new(w, h)
+
+   -- Lazy way of supporting window resizing
+   right_toolbar.pos = Vec2.new(screen.x - math.floor(unit * 2) * 16 * 2, screen.y - math.floor(unit * 2) * 16)
 end
 
 function love.draw()

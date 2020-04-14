@@ -94,9 +94,13 @@ function Sampler.new()
       return false
    end
    
-   function self.draw()      
+   function self.draw()
+      -- Lazy way of supporting window resizing
+      pixel_size = unit * 32
+      self.pos = Vec2.new(screen.x - self.size.x * pixel_size, 0)
+      
       local mp = Area.getPoint(self.pos, self.size.mul(pixel_size), getMousePosition())
-
+      
       graphics.setColor(146 / 255, 155 / 255, 150 / 255, 1)
       graphics.rectangle("fill", self.pos.x, 0, screen.x, screen.y)
       graphics.setColor(1, 1, 1, 1)

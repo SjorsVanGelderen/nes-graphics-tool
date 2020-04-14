@@ -33,7 +33,7 @@ function Palette.new()
 
       if mp ~= nil then
 	 mp = mp.div(pixel_size).floor()
-	 local index = mp.x * 16 + mp.y + 1
+	 local index = mp.x * 16 + mp.y + 1         
 	 sampler.assignColor(index)
 	 return true
       end

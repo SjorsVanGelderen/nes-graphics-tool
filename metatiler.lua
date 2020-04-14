@@ -12,8 +12,6 @@ Metatiler = {}
 
 -- TODO:
 -- Allow creation of metasprites
--- Investigate whether background tiles support mirroring or not
--- Only allow one sample per 4 metatiles
 
 function Metatiler.new()
    local self = {}
@@ -30,7 +28,7 @@ function Metatiler.new()
    self.patternQuad = graphics.newQuad(0, pqh / 2, pqw, pqh / 2, pqw, pqh)
    self.tile = 1
    self.tiles = {}
-   self.samples = {} -- Palettes for attribute table
+   self.samples = {}
    
    for i = 1, 1024 do
       table.insert(self.tiles, 1)
@@ -87,7 +85,7 @@ function Metatiler.new()
       
    end
 
-   function self.mousepressed(x, y)
+   function self.mousepressed(x, y)      
       local point = Area.getPoint(
 	 Vec2.new(0, 0),
 	 Vec2.new(pqw * pq_pixel_size, (pqh / 2) * pq_pixel_size),
