@@ -12,6 +12,9 @@ Nametable = {}
 
 function Nametable.new()
    local self = {}
+   self.zoom = 8
+   self.translation = Vec2.new(0, 0)
+   self.screen_metatile = Vec2.new(0, 0)
    self.metatiles = {}
    self.metatile = 1
    self.quads = {}
@@ -43,7 +46,9 @@ function Nametable.new()
    end
 
    function self.mousemoved(mx, my, mdx, mdy)
-      
+      if translating then
+         self.translation = self.translation.add(Vec2.new(mdx, mdy))
+      end
    end
 
    function self.mousepressed(x, y)
@@ -60,13 +65,13 @@ function Nametable.new()
 	 return true
       else
 	 point = Area.getPoint(
-	    translation,
-	    Vec2.new(mtw * 16 * zoom, mth * 16 * zoom),
+	    self.translation,
+	    Vec2.new(mtw * 16 * self.zoom, mth * 16 * self.zoom),
 	    getMousePosition()
 	 )
 	 
 	 if point ~= nil then
-	    point = point.div(16 * zoom).floor()
+	    point = point.div(16 * self.zoom).floor()
 	    
 	    local index = point.y * 16 + point.x + 1
 	    self.metatiles[index] = self.metatile
@@ -95,8 +100,8 @@ function Nametable.new()
 	    graphics.draw(
 	       metatiler.image,
 	       self.quads[(y - 1) * 16 + x],
-	       translation.x + zoom * (x - 1) * 16,
-	       translation.y + zoom * (y - 1) * 16,
+	       self.translation.x + self.zoom * (x - 1) * 16,
+	       self.translation.y + self.zoom * (y - 1) * 16,
 	       0,
 	       zoom,
 	       zoom
@@ -108,14 +113,14 @@ function Nametable.new()
       
       for i = 0, 16 do
 	 graphics.line(
-	    translation.x + i * 16 * zoom, translation.y,
-	    translation.x + i * 16 * zoom, translation.y + 15 * 16 * zoom
+	    self.translation.x + i * 16 * self.zoom, self.translation.y,
+	    self.translation.x + i * 16 * self.zoom, self.translation.y + 15 * 16 * self.zoom
 	 )
 
          if i < 16 then
             graphics.line(
-               translation.x, translation.y + i * 16 * zoom,
-               translation.x + 16 * 16 * zoom, translation.y + i * 16 * zoom
+               self.translation.x, self.translation.y + i * 16 * self.zoom,
+               self.translation.x + 16 * 16 * self.zoom, self.translation.y + i * 16 * self.zoom
             )
          end
       end

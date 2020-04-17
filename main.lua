@@ -18,14 +18,13 @@ local mode = "pattern"
 
 screen = nil
 unit = nil
-translation = Vec2.new(0, 0)
-zoom = 8
-translating = false
 metatiler = nil
 nametable = nil
 palette = nil
 pattern = nil
 sampler = nil
+translating = false
+hint = ""
 
 -- Tools
 -- 1 pencil
@@ -147,11 +146,7 @@ function love.mousereleased(x, y, button, istouch, presses)
    end
 end
 
-function love.mousemoved(x, y, dx, dy, istouch)
-   if translating then
-      translation = translation.add(Vec2.new(dx, dy))
-   end
-   
+function love.mousemoved(x, y, dx, dy, istouch)   
    if mode == "pattern" then
       pattern.mousemoved(x, y, dx, dy)
    elseif mode == "metatiler" then
@@ -162,7 +157,13 @@ function love.mousemoved(x, y, dx, dy, istouch)
 end
 
 function love.wheelmoved(x, y)
-   zoom = constrain(zoom + y * 0.1, 4, 32)
+   if mode == "pattern" then
+      pattern.zoom = constrain(pattern.zoom + y * 0.1, 4, 32)
+   elseif mode == "metatiler" then
+      metatiler.zoom = constrain(metatiler.zoom + y * 0.1, 4, 32)
+   elseif mode == "nametable" then
+      nametable.zoom = constrain(nametable.zoom + y * 0.1, 4, 32)
+   end
 end
 
 function love.resize(w, h)
@@ -171,6 +172,16 @@ function love.resize(w, h)
 
    -- Lazy way of supporting window resizing
    right_toolbar.pos = Vec2.new(screen.x - math.floor(unit * 2) * 16 * 2, screen.y - math.floor(unit * 2) * 16)
+end
+
+function love.update()
+   if mode == "pattern" then
+      hint = "pattern | tile " .. pattern.tile .. " | px " .. pattern.px.x .. "," .. pattern.px.y
+   elseif mode == "metatiler" then
+      hint = "metatiler | metatile " .. metatiler.metatile
+   elseif mode == "nametable" then
+      hint = "nametable | screen metatile " .. nametable.screen_metatile.x .. "," .. nametable.screen_metatile.y
+   end
 end
 
 function love.draw()
@@ -186,4 +197,8 @@ function love.draw()
 
    sampler.draw()
    right_toolbar.draw()
+
+   love.graphics.setColor(1, 1, 1, 1)
+   love.graphics.print(hint, screen.x / 2 - font:getWidth(hint) / 2, screen.y - font:getHeight())
+   love.graphics.setColor(1, 0, 1, 0)
 end

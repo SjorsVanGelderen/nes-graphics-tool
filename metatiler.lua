@@ -21,11 +21,13 @@ function Metatiler.new()
    local mt_pixel_size = math.floor(unit)
    local mt_tile_size = mt_pixel_size * 16
 
+   self.zoom = 8
+   self.translation = Vec2.new(0, 0)
    self.image_data = image.newImageData(256, 256)
    self.image = graphics.newImage(self.image_data)
    self.image:setFilter("nearest", "nearest")
-   
    self.patternQuad = graphics.newQuad(0, pqh / 2, pqw, pqh / 2, pqw, pqh)
+   self.metatile = 0
    self.tile = 1
    self.tiles = {}
    self.samples = {}
@@ -82,7 +84,9 @@ function Metatiler.new()
    end
 
    function self.mousemoved(mx, my, mdx, mdy)
-      
+      if translating then
+         self.translation = self.translation.add(Vec2.new(mdx, mdy))
+      end
    end
 
    function self.mousepressed(x, y)      
@@ -99,17 +103,17 @@ function Metatiler.new()
 	 return true
       else
 	 point = Area.getPoint(
-	    translation,
-	    Vec2.new(mt_tile_size * 16 * zoom, mt_tile_size * 16 * zoom),
+	    self.translation,
+	    Vec2.new(mt_tile_size * 16 * self.zoom, mt_tile_size * 16 * self.zoom),
 	    getMousePosition()
 	 )
 	 
 	 if point ~= nil then
-	    local tilePoint = point.div((mt_tile_size / 2) * zoom).floor()
+	    local tilePoint = point.div((mt_tile_size / 2) * self.zoom).floor()
 	    local tileIndex = tilePoint.y * 32 + tilePoint.x + 1
 	    self.tiles[tileIndex] = self.tile
 
-            local p = point.div(mt_tile_size * zoom).floor()
+            local p = point.div(mt_tile_size * self.zoom).floor()
             point = p.mul(2).add(Vec2.new(1, 1))
 
             local s = p.y * 16 + p.x + 1
@@ -134,24 +138,24 @@ function Metatiler.new()
       graphics.setColor(1, 1, 1, 1)
       graphics.draw(
 	 self.image,
-	 translation.x,
-	 translation.y,
+	 self.translation.x,
+	 self.translation.y,
 	 0,
-	 mt_pixel_size * zoom,
-	 mt_pixel_size * zoom
+	 mt_pixel_size * self.zoom,
+	 mt_pixel_size * self.zoom
       )
       
       graphics.setColor(1, 0, 1, 1)
       
       for i = 0, 16 do
 	 graphics.line(
-	    translation.x + i * mt_tile_size * zoom, translation.y,
-	    translation.x + i * mt_tile_size * zoom, translation.y + mt_tile_size * 16 * zoom
+	    self.translation.x + i * mt_tile_size * self.zoom, self.translation.y,
+	    self.translation.x + i * mt_tile_size * self.zoom, self.translation.y + mt_tile_size * 16 * self.zoom
 	 )
 	 
 	 graphics.line(
-	    translation.x, translation.y + i * mt_tile_size * zoom,
-	    translation.x + mt_tile_size * 16 * zoom, translation.y + i * mt_tile_size * zoom
+	    self.translation.x, self.translation.y + i * mt_tile_size * self.zoom,
+	    self.translation.x + mt_tile_size * 16 * self.zoom, self.translation.y + i * mt_tile_size * self.zoom
 	 )
       end
       

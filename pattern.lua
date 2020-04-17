@@ -14,12 +14,16 @@ Pattern = {}
 function Pattern.new()
    local self = {}
    self.size = Vec2.new(128, 256)
+   self.zoom = 8
+   self.translation = Vec2.new(0, 0)
    self.drawing_points = {}
    self.plot_start = nil
    self.tone_image_data = image.newImageData(self.size.x, self.size.y)
    self.image_data = image.newImageData(self.size.x, self.size.y)
    self.image = graphics.newImage(self.image_data)
    self.image:setFilter("nearest", "nearest")
+   self.tile = 0
+   self.px = Vec2.new(0, 0)
 
    function self.replacePixels(pixels)
       self.tone_image_data:mapPixel(
@@ -96,13 +100,17 @@ function Pattern.new()
       self.drawing_image:replacePixels(self.drawing_image_data)
    end
 
-   function self.mousemoved(mx, my, mdx, mdy)      
-      local point = Area.getPoint(translation, self.size.mul(zoom), Vec2.new(mx, my))
+   function self.mousemoved(mx, my, mdx, mdy)
+      if translating then
+         self.translation = self.translation.add(Vec2.new(mdx, mdy))
+      end
+      
+      local point = Area.getPoint(self.translation, self.size.mul(self.zoom), Vec2.new(mx, my))
 
       processDrawing("clear")
       
       if point ~= nil then
-	 point = point.div(zoom).floor()
+	 point = point.div(self.zoom).floor()
 
 	 self.drawing_points = { point }
 
@@ -175,10 +183,10 @@ function Pattern.new()
    
    function self.mousepressed(x, y, button)
       if button == 1 and self.plot_start == nil then
-	 self.plot_start = Area.getPoint(translation, self.size.mul(zoom), Vec2.new(x, y))
+	 self.plot_start = Area.getPoint(self.translation, self.size.mul(self.zoom), Vec2.new(x, y))
 	 
 	 if self.plot_start ~= nil then
-	    self.plot_start = self.plot_start.div(zoom).floor()
+	    self.plot_start = self.plot_start.div(self.zoom).floor()
 
 	    if tool == 1 and mouse.isDown(1) then -- Pencil
 	       local c = nil
@@ -216,15 +224,15 @@ function Pattern.new()
    
    function self.draw()
       graphics.setColor(1, 1, 1, 1)
-      graphics.draw(self.image, translation.x, translation.y, 0, zoom)
-      graphics.draw(self.drawing_image, translation.x, translation.y, 0, zoom)
+      graphics.draw(self.image, self.translation.x, self.translation.y, 0, self.zoom)
+      graphics.draw(self.drawing_image, self.translation.x, self.translation.y, 0, self.zoom)
       graphics.setColor(1, 0, 1, 1)
 
       for i = 0, self.size.y / 8 do
 	 if i < 17 then
 	    graphics.line(
-	       i * 8 * zoom + translation.x, translation.y,
-	       i * 8 * zoom + translation.x, self.size.y * zoom + translation.y
+	       i * 8 * self.zoom + self.translation.x, self.translation.y,
+	       i * 8 * self.zoom + self.translation.x, self.size.y * self.zoom + self.translation.y
 	    )
 	 end
 
@@ -233,8 +241,8 @@ function Pattern.new()
 	 end
 	 
 	 graphics.line(
-	    translation.x, i * 8 * zoom + translation.y,
-	    self.size.x * zoom + translation.x, i * 8 * zoom + translation.y
+	    self.translation.x, i * 8 * self.zoom + self.translation.y,
+	    self.size.x * self.zoom + self.translation.x, i * 8 * self.zoom + self.translation.y
 	 )
 
 	 graphics.setColor(1, 0, 1, 1)

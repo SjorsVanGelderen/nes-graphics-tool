@@ -477,10 +477,15 @@ function saveAttributeTable(path)
 
          for i = 1, #metatileIndices do
             local s = metatiler.samples[nametable.metatiles[metatileIndices[i]]]
-            byte = bit.bor(byte, bit.lshift(0x01, 1 + offset))
-         elseif sample == 3 then
-            byte = bit.bor(byte, bit.lshift(0x01, 0 + offset))
-            byte = bit.bor(byte, bit.lshift(0x01, 1 + offset))
+
+            if sample == 1 then
+               byte = bit.bor(byte, bit.lshift(0x01, 1 + offset))
+            elseif sample == 2 then
+               byte = bit.bor(byte, bit.lshift(0x01, 0 + offset))
+            elseif sample == 3 then
+               byte = bit.bor(byte, bit.lshift(0x01, 0 + offset))
+               byte = bit.bor(byte, bit.lshift(0x01, 1 + offset))
+            end
          end
       end
       
