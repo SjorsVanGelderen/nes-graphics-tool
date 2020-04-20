@@ -24,6 +24,13 @@ function Metatiler.new()
    self.zoom = 4
    self.translation = Vec2.new(screen.x / 2 - mt_tile_size * 8 * self.zoom, 0)
    self.image_data = image.newImageData(256, 256)
+
+   self.image_data:mapPixel(
+      function(r, g, b, a)
+         return 0, 0, 0, 1
+      end
+   )
+   
    self.image = graphics.newImage(self.image_data)
    self.image:setFilter("nearest", "nearest")
    self.patternQuad = graphics.newQuad(0, pqh / 2, pqw, pqh / 2, pqw, pqh)

@@ -53,10 +53,10 @@ function Nametable.new()
       local point = Area.getPoint(
          Vec2.new(0, 0),
          Vec2.new(mtw * mt_pixel_size, mth * mt_pixel_size),
-         getMousePosition()
+         Vec2.new(x, y)
       )
 
-      if not self.mouse_down and point ~= nil then
+      if point ~= nil and not self.mouse_down then
          self.dirty = true
          point = point.div(16 * mt_pixel_size).floor()
          self.metatile = point.y * 16 + point.x + 1
@@ -66,7 +66,7 @@ function Nametable.new()
          point = Area.getPoint(
             self.translation,
             Vec2.new(mtw * 16 * self.zoom, mth * 16 * self.zoom),
-            getMousePosition()
+            Vec2.new(x, y)
          )
          
          if point ~= nil then
@@ -97,6 +97,17 @@ function Nametable.new()
          self.translation = self.translation.add(Vec2.new(mdx, mdy))
       elseif self.mouse_down then
          self.mouseInput(mx, my)
+      end
+
+      local point = Area.getPoint(
+         self.translation,
+         Vec2.new(mtw * 32 * self.zoom, mth * 32 * self.zoom),
+         Vec2.new(mx, my)
+      )
+
+      if point ~= nil then
+         -- TODO: Fix this incorrect calculation
+         self.screen_metatile = point.div(32 * mt_pixel_size).floor()
       end
    end
 
