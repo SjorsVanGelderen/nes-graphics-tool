@@ -9,14 +9,14 @@ function bresenhamLine(one, two)
    local y1 = one.y
    local x2 = two.x
    local y2 = two.y
-   local dx = x2 - x1
-   local dy = y2 - y1
+   local dx = math.floor(x2 - x1)
+   local dy = math.floor(y2 - y1)
    local derr = 0
    local err = 0
    local x = x1
    local y = y1
    local points = {}
-
+   
    local xs = 1
    if dx < 0 then
       xs = -1
@@ -27,49 +27,65 @@ function bresenhamLine(one, two)
       ys = -1
    end
 
-   local algorithmX = function(x)
-      table.insert(points, Vec2.new(x, y))
-      err = err + derr
-      
-      if err >= 0.5 then
-	 y = y + ys
-	 err = err - 1
+   if dx == 0 then
+      for y = y1, y2, ys do
+         table.insert(points, Vec2.new(x1, y))
       end
-   end
-   
-   local algorithmY = function(y)
-      table.insert(points, Vec2.new(x, y))
-      err = err + derr
-      
-      if err >= 0.5 then
-	 x = x + xs
-	 err = err - 1
+   elseif dy == 0 then
+      for x = x1, x2, xs do
+         table.insert(points, Vec2.new(x, y1))
       end
-   end
-
-   if math.abs(dx) > math.abs(dy) then
-      derr = math.abs(dy / dx)
-      
-      if dx > 0 then
-	 for x = x1, x2 - 1 do
-	    algorithmX(x)
-	 end
-      else
-	 for x = x1 - 1, x2, -1 do
-	    algorithmX(x)
-	 end
+   elseif dx == dy then
+      local y = y1
+      for x = x1, x2, xs do
+         table.insert(points, Vec2.new(x, y))
+         y = y + ys
       end
    else
-      derr = math.abs(dx / dy)
+      local algorithmX = function(x)
+         table.insert(points, Vec2.new(x, y))
+         err = err + derr
+         
+         if err >= 0.5 then
+            y = y + ys
+            err = err - 1
+         end
+      end
+      
+      local algorithmY = function(y)
+         table.insert(points, Vec2.new(x, y))
+         err = err + derr
+         
+         if err >= 0.5 then
+            x = x + xs
+            err = err - 1
+         end
+      end
 
-      if dy > 0 then
-	 for y = y1, y2 - 1 do
-	    algorithmY(y)
-	 end
+      if math.abs(dx) > math.abs(dy) then
+         derr = math.abs(dy / dx)
+         
+         if dx > 0 then
+            for x = x1, x2 - 1 do
+               algorithmX(x)
+            end
+         else
+            for x = x1 - 1, x2, -1 do
+               algorithmX(x)
+            end
+         end
       else
-	 for y = y1 - 1, y2, -1 do
-	    algorithmY(y)
-	 end
+         derr = math.abs(dx / dy)
+
+         if dy > 0 then
+            for y = y1, y2 - 1 do
+               algorithmY(y)
+            end
+         else
+            for y = y1 - 1, y2, -1 do
+               algorithmY(y + 1)
+            end
+         end
       end
    end
 
