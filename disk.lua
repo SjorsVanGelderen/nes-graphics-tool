@@ -73,6 +73,7 @@ function loadPattern(path)
       metatiler.generateImage()
    end
 
+   pattern.dirty = false
    print("Loaded the pattern!")
 end
 
@@ -146,7 +147,7 @@ function loadMetatiles(path)
    end
    
    metatiler.tiles = tiles
-
+   metatiler.dirty = false
    print("Loaded the metatiles!")
 end
 
@@ -199,48 +200,8 @@ function loadNametable(path)
    file:close()
    nametable.metatiles = bytes_in_file
 
+   nametable.dirty = false
    print("Loaded the nametable!")
-end
-
-function loadAttributeTable(path)
---    local file = io.open(path .. ".at", "rb")
---    local bytes_in_file = {}
---    local samples = {}
-
---    if file == nil then
---       print("The file " .. path .. ".at does not exist!")
---       return
---    end
-
---    while true do
---       local char = file:read(1)
-
---       if char == nil then
--- 	 break
---       end
-      
---       local byte = string.byte(char)
---       bytes_in_file[#bytes_in_file + 1] = byte + 1
---    end
-   
---    for i = 1, #bytes_in_file do
---       local entry = bytes_in_file[i]
-
---       local sample_1 = bit.band(entry, 0x3)
---       local sample_2 = bit.rshift(bit.band(entry, 0xC), 2)
---       local sample_3 = bit.rshift(bit.band(entry, 0x30), 4)
---       local sample_4 = bit.rshift(bit.band(entry, 0xC0), 6)
-
---       table.insert(samples, sample_1 + 1)
---       table.insert(samples, sample_2 + 1)
---       table.insert(samples, sample_3 + 1)
---       table.insert(samples, sample_4 + 1)
---    end
-   
---    file:close()
---    -- metatiler.samples = samples -- This is wrong
-
---    print("Loaded the attribute table!")
 end
 
 function loadProject()
@@ -257,7 +218,6 @@ function loadProject()
    loadMetatiles(path)
    loadMetatilesSamples(path)
    loadNametable(path)
-   loadAttributeTable(path)
    sampler.updateSamples()
    pattern.updateColors()
    metatiler.generateImage()
@@ -314,6 +274,7 @@ function savePattern(path)
    
    file:close()
 
+   pattern.dirty = false
    print("Saved the pattern!")
 end
 
@@ -386,6 +347,7 @@ function saveMetatiles(path)
    
    file:close()
 
+   metatiler.dirty = false
    print("Saved the metatiles!")
 end
 
@@ -442,6 +404,7 @@ function saveNametable(path)
    
    file:close()
 
+   nametable.dirty = false
    print("Saved the nametable!")
 end
 

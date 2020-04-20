@@ -15,7 +15,7 @@ function Pattern.new()
    local self = {}
    self.size = Vec2.new(128, 256)
    self.zoom = 8
-   self.translation = Vec2.new(0, 0)
+   self.translation = Vec2.new(screen.x / 2 - self.size.x / 2 * self.zoom, 0)
    self.drawing_points = {}
    self.plot_start = nil
    self.tone_image_data = image.newImageData(self.size.x, self.size.y)
@@ -24,6 +24,7 @@ function Pattern.new()
    self.image:setFilter("nearest", "nearest")
    self.tile = 0
    self.px = Vec2.new(0, 0)
+   self.dirty = false
 
    function self.replacePixels(pixels)
       self.tone_image_data:mapPixel(
@@ -112,6 +113,8 @@ function Pattern.new()
       if point ~= nil then
 	 point = point.div(self.zoom).floor()
 
+         self.tile = math.floor(point.y / 8) * 16 + math.floor(point.x / 8)
+         self.px = point.mod(8)
 	 self.drawing_points = { point }
 
 	 if tool == 1 then -- Pencil
@@ -186,6 +189,7 @@ function Pattern.new()
 	 self.plot_start = Area.getPoint(self.translation, self.size.mul(self.zoom), Vec2.new(x, y))
 	 
 	 if self.plot_start ~= nil then
+            self.dirty = true
 	    self.plot_start = self.plot_start.div(self.zoom).floor()
 
 	    if tool == 1 and mouse.isDown(1) then -- Pencil

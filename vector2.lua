@@ -47,6 +47,10 @@ function Vec2.new(x, y)
    function self.dist(other)
       return other.sub(self).mag()
    end
+
+   function self.mod(value)
+      return Vec2.new(self.x % value, self.y % value)
+   end
    
    return self
 end

@@ -40,7 +40,7 @@ local right_toolbar = nil
 function love.load()
    window.setTitle("NES Graphics Tool")
    window.setMode(
-      1024, 768,
+      1600, 900,
       { resizable = true,
 	minwidth = 800,
 	minheight = 600
@@ -83,6 +83,18 @@ end
 
 function love.keypressed(key, scancode, isrepeat)
    if key == "escape" then
+      if pattern.dirty or metatiler.dirty or nametable.dirty then
+         print("There are unsaved changes. Are you sure you want to quit? y/n")
+         response = io.read()
+
+         if response == nil or response == "n" or response == "no" or
+            (response ~= "y" and response ~= "yes")
+         then
+            print("Canceled!")
+            return
+         end
+      end
+      
       love.event.quit()
       return
    elseif key == "space" and not translating then
@@ -138,6 +150,8 @@ function love.mousepressed(x, y, button, istouch, presses)
 end
 
 function love.mousereleased(x, y, button, istouch, presses)
+   nametable.mousereleased()
+   
    if button == 1 and mode == "pattern" then
       pattern.mousereleased(x, y)
    elseif button == 2 and translating then
@@ -182,6 +196,14 @@ function love.update()
    elseif mode == "nametable" then
       hint = "nametable | screen metatile " .. nametable.screen_metatile.x .. "," .. nametable.screen_metatile.y
    end
+
+   -- This does not need to happen every frame, but it will serve for now
+   local star = ""
+   if pattern.dirty or metatiler.dirty or nametable.dirty then
+      star = " *"
+   end
+   
+   window.setTitle("NES Graphics Tool" .. star)
 end
 
 function love.draw()

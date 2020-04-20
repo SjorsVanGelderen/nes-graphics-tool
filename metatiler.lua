@@ -21,8 +21,8 @@ function Metatiler.new()
    local mt_pixel_size = math.floor(unit)
    local mt_tile_size = mt_pixel_size * 16
 
-   self.zoom = 8
-   self.translation = Vec2.new(0, 0)
+   self.zoom = 4
+   self.translation = Vec2.new(screen.x / 2 - mt_tile_size * 8 * self.zoom, 0)
    self.image_data = image.newImageData(256, 256)
    self.image = graphics.newImage(self.image_data)
    self.image:setFilter("nearest", "nearest")
@@ -31,6 +31,7 @@ function Metatiler.new()
    self.tile = 1
    self.tiles = {}
    self.samples = {}
+   self.dirty = false
    
    for i = 1, 1024 do
       table.insert(self.tiles, 1)
@@ -87,6 +88,16 @@ function Metatiler.new()
       if translating then
          self.translation = self.translation.add(Vec2.new(mdx, mdy))
       end
+
+      local point = Area.getPoint(
+         self.translation,
+         Vec2.new(mt_tile_size * 16 * self.zoom, mt_tile_size * 16 * self.zoom),
+         getMousePosition()
+      )
+      
+      if point ~= nil then
+         self.metatile = math.floor(point.y / (mt_tile_size * self.zoom)) * 16 + math.floor(point.x / (mt_tile_size * self.zoom))
+      end
    end
 
    function self.mousepressed(x, y)      
@@ -97,6 +108,7 @@ function Metatiler.new()
       )
 
       if point ~= nil then
+         self.dirty = true
 	 point = point.div(pq_tile_size).floor()
 	 self.tile = point.y * 16 + point.x + 1
 	 
@@ -107,10 +119,11 @@ function Metatiler.new()
 	    Vec2.new(mt_tile_size * 16 * self.zoom, mt_tile_size * 16 * self.zoom),
 	    getMousePosition()
 	 )
-	 
+         
 	 if point ~= nil then
 	    local tilePoint = point.div((mt_tile_size / 2) * self.zoom).floor()
 	    local tileIndex = tilePoint.y * 32 + tilePoint.x + 1
+            
 	    self.tiles[tileIndex] = self.tile
 
             local p = point.div(mt_tile_size * self.zoom).floor()

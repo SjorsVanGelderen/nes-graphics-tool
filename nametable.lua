@@ -12,15 +12,19 @@ Nametable = {}
 
 function Nametable.new()
    local self = {}
-   self.zoom = 8
-   self.translation = Vec2.new(0, 0)
+   local mt_pixel_size = unit
+   local mtw, mth = metatiler.image:getDimensions()
+   
+   self.zoom = 4
+   -- TODO: fix this calculation, it doesn't center properly
+   -- self.translation = Vec2.new(screen.x / 2 - 16 * 8 * mt_pixel_size * self.zoom, 0)
+   self.translation = Vec2.new(screen.x / 2, 0)
    self.screen_metatile = Vec2.new(0, 0)
    self.metatiles = {}
    self.metatile = 1
    self.quads = {}
-   
-   local mtw, mth = metatiler.image:getDimensions()
-   local mt_pixel_size = unit
+   self.dirty = false
+   self.mouse_down = false
    
    -- 16 * 15 = 240 (16x16) metatiles, 960 (8x8) tiles
    for i = 1, 240 do
@@ -45,51 +49,63 @@ function Nametable.new()
       end
    end
 
+   function self.mouseInput(x, y)
+      local point = Area.getPoint(
+         Vec2.new(0, 0),
+         Vec2.new(mtw * mt_pixel_size, mth * mt_pixel_size),
+         getMousePosition()
+      )
+
+      if not self.mouse_down and point ~= nil then
+         self.dirty = true
+         point = point.div(16 * mt_pixel_size).floor()
+         self.metatile = point.y * 16 + point.x + 1
+         
+         return true
+      else
+         point = Area.getPoint(
+            self.translation,
+            Vec2.new(mtw * 16 * self.zoom, mth * 16 * self.zoom),
+            getMousePosition()
+         )
+         
+         if point ~= nil then
+            self.mouse_down = true
+            point = point.div(16 * self.zoom).floor()
+            
+            local index = point.y * 16 + point.x + 1
+            self.metatiles[index] = self.metatile
+            
+            self.quads[index]:setViewport(
+               (self.metatile - 1) % 16 * 16,
+               math.floor((self.metatile - 1) / 16) * 16,
+               16,
+               16,
+               mtw,
+               mth
+            )
+            
+            return true
+         end
+      end
+      
+      return false
+   end
+   
    function self.mousemoved(mx, my, mdx, mdy)
       if translating then
          self.translation = self.translation.add(Vec2.new(mdx, mdy))
+      elseif self.mouse_down then
+         self.mouseInput(mx, my)
       end
    end
 
    function self.mousepressed(x, y)
-      local point = Area.getPoint(
-	 Vec2.new(0, 0),
-	 Vec2.new(mtw * mt_pixel_size, mth * mt_pixel_size),
-	 getMousePosition()
-      )
+      return self.mouseInput(x, y)
+   end
 
-      if point ~= nil then
-	 point = point.div(16 * mt_pixel_size).floor()
-	 self.metatile = point.y * 16 + point.x + 1
-	 
-	 return true
-      else
-	 point = Area.getPoint(
-	    self.translation,
-	    Vec2.new(mtw * 16 * self.zoom, mth * 16 * self.zoom),
-	    getMousePosition()
-	 )
-	 
-	 if point ~= nil then
-	    point = point.div(16 * self.zoom).floor()
-	    
-	    local index = point.y * 16 + point.x + 1
-	    self.metatiles[index] = self.metatile
-	    
-	    self.quads[index]:setViewport(
-	       (self.metatile - 1) % 16 * 16,
-	       math.floor((self.metatile - 1) / 16) * 16,
-	       16,
-	       16,
-	       mtw,
-	       mth
-	    )
-	       
-	    return true
-	 end
-      end
-      
-      return false
+   function self.mousereleased()
+      self.mouse_down = false
    end
    
    function self.draw()
@@ -103,8 +119,8 @@ function Nametable.new()
 	       self.translation.x + self.zoom * (x - 1) * 16,
 	       self.translation.y + self.zoom * (y - 1) * 16,
 	       0,
-	       zoom,
-	       zoom
+	       self.zoom,
+	       self.zoom
 	    )
 	 end
       end
