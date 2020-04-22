@@ -417,10 +417,10 @@ function saveAttributeTable(path)
       response = io.read()
 
       if response == nil or response == "n" or response == "no" or
-	 (response ~= "y" and response ~= "yes")
+         (response ~= "y" and response ~= "yes")
       then
-	 print("Canceled!")
-	 return
+         print("Canceled!")
+         return
       end
    end
    
@@ -429,6 +429,7 @@ function saveAttributeTable(path)
    
    for y = 1, 8 do
       for x = 1, 8 do
+         local byte = 0x00
          local offset = (y - 1) * 16 * 2 + (x - 1) * 2 + 1
          
          local metatileIndices = {
@@ -437,22 +438,30 @@ function saveAttributeTable(path)
             offset + 16, -- Bottom left
             offset + 17 -- Bottom right
          }
-
+         
          for i = 1, #metatileIndices do
-            local s = metatiler.samples[nametable.metatiles[metatileIndices[i]]]
+            local sample = metatiler.samples[nametable.metatiles[metatileIndices[i]]]
+
+            if sample == nil then
+               sample = 1 -- The last row needs dummy values
+            end
+
+            sample = sample - 1
+
+            local o = (i - 1) * 2
 
             if sample == 1 then
-               byte = bit.bor(byte, bit.lshift(0x01, 1 + offset))
+               byte = bit.bor(byte, bit.lshift(0x01, 0 + o))
             elseif sample == 2 then
-               byte = bit.bor(byte, bit.lshift(0x01, 0 + offset))
+               byte = bit.bor(byte, bit.lshift(0x01, 1 + o))
             elseif sample == 3 then
-               byte = bit.bor(byte, bit.lshift(0x01, 0 + offset))
-               byte = bit.bor(byte, bit.lshift(0x01, 1 + offset))
+               byte = bit.bor(byte, bit.lshift(0x01, 1 + o))
+               byte = bit.bor(byte, bit.lshift(0x01, 0 + o))
             end
          end
+
+         file:write(string.char(byte))
       end
-      
-      file:write(string.char(byte))
    end
    
    file:close()
