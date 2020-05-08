@@ -1,11 +1,11 @@
 -- Copyright 2020, Sjors van Gelderen
 
 function loadPattern(path)
-   local file = io.open(path .. ".chr", "rb")
+   local file = io.open(path .. "/" .. path .. ".chr", "rb")
    local bytes_in_file = {}
 
    if file == nil then
-      print("The file " .. path .. ".chr does not exist!")
+      print("The file " .. path .. "/" .. path .. ".chr does not exist!")
       return
    end
 
@@ -78,11 +78,11 @@ function loadPattern(path)
 end
 
 function loadSamples(path)
-   local file = io.open(path .. ".s", "rb")
+   local file = io.open(path .. "/" .. path .. ".s", "rb")
    local bytes_in_file = {}
 
    if file == nil then
-      print("The file " .. path .. ".s does not exist!")
+      print("The file " .. path .. "/" .. path .. ".s does not exist!")
       return
    end
 
@@ -111,11 +111,11 @@ function loadSamples(path)
 end
 
 function loadMetatiles(path)
-   local file = io.open(path .. ".mt", "rb")
+   local file = io.open(path .. "/" .. path .. ".mt", "rb")
    local bytes_in_file = {}
 
    if file == nil then
-      print("The file " .. path .. ".mt does not exist!")
+      print("The file " .. path .. "/" .. path .. ".mt does not exist!")
       return
    end
 
@@ -152,11 +152,11 @@ function loadMetatiles(path)
 end
 
 function loadMetatilesSamples(path)
-   local file = io.open(path .. ".mts", "rb")
+   local file = io.open(path .. "/" .. path .. ".mts", "rb")
    local bytes_in_file = {}
 
    if file == nil then
-      print("The file " .. path .. ".mts does not exist!")
+      print("The file " .. path .. "/" .. path .. ".mts does not exist!")
       return
    end
 
@@ -178,7 +178,7 @@ function loadMetatilesSamples(path)
 end
 
 function loadNametable(path)
-   local file = io.open(path .. ".nt", "rb")
+   local file = io.open(path .. "/" .. path .. ".nt", "rb")
    local bytes_in_file = {}
 
    if file == nil then
@@ -227,11 +227,11 @@ end
 function savePattern(path)
    local image_data = pattern.tone_image_data
 
-   local file = io.open(path .. ".chr", "r")
+   local file = io.open(path .. "/" .. path .. ".chr", "r")
    if file ~= nil then
       file:close()
       
-      print(path .. ".chr exists already. Overwrite? y/n")
+      print(path .. "/" .. path .. ".chr exists already. Overwrite? y/n")
       response = io.read()
 
       if response == nil or response == "n" or response == "no" or
@@ -242,7 +242,7 @@ function savePattern(path)
       end
    end
    
-   local file = io.open(path .. ".chr", "wb+")
+   local file = io.open(path .. "/" .. path .. ".chr", "wb+")
    
    for tile_y = 1, 32 do
       for tile_x = 1, 16 do
@@ -279,11 +279,11 @@ function savePattern(path)
 end
 
 function saveSamples(path)
-   local file = io.open(path .. ".s", "r")
+   local file = io.open(path .. "/" .. path .. ".s", "r")
    if file ~= nil then
       file:close()
       
-      print(path .. ".s exists already. Overwrite? y/n")
+      print(path .. "/" .. path .. ".s exists already. Overwrite? y/n")
       response = io.read()
 
       if response == nil or response == "n" or response == "no" or
@@ -294,7 +294,7 @@ function saveSamples(path)
       end
    end
    
-   local file = io.open(path .. ".s", "wb+")
+   local file = io.open(path .. "/" .. path .. ".s", "wb+")
    
    for i = 1, #sampler.samples do
       file:write(string.char(sampler.background_color - 1))
@@ -311,11 +311,11 @@ function saveSamples(path)
 end
 
 function saveMetatiles(path)   
-   local file = io.open(path .. ".mt", "r")
+   local file = io.open(path .. "/" .. path .. ".mt", "r")
    if file ~= nil then
       file:close()
       
-      print(path .. ".mt exists already. Overwrite? y/n")
+      print(path .. "/" .. path .. ".mt exists already. Overwrite? y/n")
       response = io.read()
 
       if response == nil or response == "n" or response == "no" or
@@ -326,7 +326,7 @@ function saveMetatiles(path)
       end
    end
 
-   local file = io.open(path .. ".mt", "wb+")
+   local file = io.open(path .. "/" .. path .. ".mt", "wb+")
    local indices = {}
    
    for i = 1, 256 do
@@ -352,11 +352,11 @@ function saveMetatiles(path)
 end
 
 function saveMetatilesSamples(path)
-   local file = io.open(path .. ".mts", "r")
+   local file = io.open(path .. "/" .. path .. ".mts", "r")
    if file ~= nil then
       file:close()
       
-      print(path .. ".mts exists already. Overwrite? y/n")
+      print(path .. "/" .. path .. ".mts exists already. Overwrite? y/n")
       response = io.read()
 
       if response == nil or response == "n" or response == "no" or
@@ -367,7 +367,7 @@ function saveMetatilesSamples(path)
       end
    end
    
-   local file = io.open(path .. ".mts", "wb+")
+   local file = io.open(path .. "/" .. path .. ".mts", "wb+")
 
    for i = 1, #metatiler.samples do
       local byte = metatiler.samples[i]
@@ -380,11 +380,11 @@ function saveMetatilesSamples(path)
 end
 
 function saveNametable(path)
-   local file = io.open(path .. ".nt", "r")
+   local file = io.open(path .. "/" .. path .. ".nt", "r")
    if file ~= nil then
       file:close()
       
-      print(path .. ".nt exists already. Overwrite? y/n")
+      print(path .. "/" .. path .. ".nt exists already. Overwrite? y/n")
       response = io.read()
 
       if response == nil or response == "n" or response == "no" or
@@ -395,7 +395,7 @@ function saveNametable(path)
       end
    end
    
-   local file = io.open(path .. ".nt", "wb+")
+   local file = io.open(path .. "/" .. path .. ".nt", "wb+")
 
    for i = 1, #nametable.metatiles do      
       local byte = nametable.metatiles[i] - 1
@@ -409,11 +409,11 @@ function saveNametable(path)
 end
 
 function saveAttributeTable(path)
-   local file = io.open(path .. ".at", "r")
+   local file = io.open(path .. "/" .. path .. ".at", "r")
    if file ~= nil then
       file:close()
       
-      print(path .. ".at exists already. Overwrite? y/n")
+      print(path .. "/" .. path .. ".at exists already. Overwrite? y/n")
       response = io.read()
 
       if response == nil or response == "n" or response == "no" or
@@ -424,7 +424,7 @@ function saveAttributeTable(path)
       end
    end
    
-   local file = io.open(path .. ".at", "wb+")
+   local file = io.open(path .. "/" .. path .. ".at", "wb+")
    local samples = {}
    
    for y = 1, 8 do

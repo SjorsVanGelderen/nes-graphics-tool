@@ -10,6 +10,8 @@ local mouse = love.mouse
 
 Nametable = {}
 
+-- TODO: Allow multiple nametables
+
 function Nametable.new()
    local self = {}
    local mt_pixel_size = unit
