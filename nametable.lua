@@ -77,6 +77,10 @@ function Nametable.new()
             
             local index = point.y * 16 + point.x + 1
             self.metatiles[index] = self.metatile
+
+            if index < 1 or index > #self.quads then
+               return false
+            end
             
             self.quads[index]:setViewport(
                (self.metatile - 1) % 16 * 16,
@@ -108,8 +112,8 @@ function Nametable.new()
       )
 
       if point ~= nil then
-         -- TODO: Fix this incorrect calculation
-         self.screen_metatile = point.div(32 * mt_pixel_size).floor()
+         point = point.div(self.zoom).div(16).floor()
+         self.screen_metatile = point
       end
    end
 
